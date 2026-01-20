@@ -8,6 +8,23 @@ repeat
 	task.wait()
 until game:IsLoaded()
 
+local queueonteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport) or nil
+
+if queueonteleport then
+	queueonteleport([[
+		repeat task.wait() until game:IsLoaded()
+		task.wait(2)
+		loadstring(game:HttpGet('https://raw.githubusercontent.com/I-AM-A-COWBOY/ubiquitous-fortnight/refs/heads/main/script.lua'))()
+	]])
+	print("✅ Auto-reload configuré pour le prochain serverhop")
+else
+	warn("⚠️ queueonteleport non supporté par ton exécuteur")
+end
+
+if game.PlaceId ~= 8737602449 and game.PlaceId ~= 8943844393 then
+	return
+end
+
 --Stops script if on a different game
 if game.PlaceId ~= 8737602449 and game.PlaceId ~= 8943844393 then
 	return
@@ -100,12 +117,12 @@ local queueonteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or 
 local httprequest = (syn and syn.request) or http and http.request or http_request or (fluxus and fluxus.request) or request
 local httpservice = HttpService
 if queueonteleport then
-	queueonteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/CF-Trail/tzechco-PlsDonateAutofarmBackup/main/old.lua'))()")
+	queueonteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/I-AM-A-COWBOY/ubiquitous-fortnight/refs/heads/main/script.lua'))()")
 end
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/CF-Trail/tzechco-PlsDonateAutofarmBackup/main/UI"))()
 local _HIGHLIGHTLOADER
 pcall(function()
-     _HIGHLIGHTLOADER = loadstring(game:HttpGet('https://raw.githubusercontent.com/CF-Trail/tzechco-PlsDonateAutofarmBackup/main/hl.lib.lua'))()
+     _HIGHLIGHTLOADER = loadstring(game:HttpGet('https://raw.githubusercontent.com/I-AM-A-COWBOY/ubiquitous-fortnight/refs/heads/main/script.lua'))()
 end)
 
 function forceServerHop()
