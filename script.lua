@@ -1731,7 +1731,7 @@ Players.PlayerChatted:Connect(function(_____________________, player, message)
 				if table.find(messagesToResp.Greetings,message) then
 					chat(getgenv().settings.helloResponce[math.random(1, #getgenv().settings.helloResponce)])
 				elseif string.find(message, 'bot') then
-					mchat(getgenv().settings.botResponce[math.random(1, #getgenv().settings.botResponce)])
+					chat(getgenv().settings.botResponce[math.random(1, #getgenv().settings.botResponce)])
 				elseif string.find(message, 'donate') then
 					chat(getgenv().settings.donateResponce[math.random(1, #getgenv().settings.donateResponce)])
 				elseif string.find(message, 'scam') then
