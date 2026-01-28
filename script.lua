@@ -776,7 +776,7 @@ boothTab:AddLabel("━━━━━━━━━━━━━━━━━━━━�
 boothTab:AddLabel("📍 POSITION")
 boothTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
 
-local standingPos = boothTab:AddDropdown("📍 Position [ " .. getgenv().settings.standingPosition .. " ]", function(t)
+local standingPos = boothTab:AddDropdown("📍 Position du joueur au Spawn [ " .. getgenv().settings.standingPosition .. " ]", function(t)
 	getgenv().settings.standingPosition = t
 	saveSettings()
 	if t == "Front" then
