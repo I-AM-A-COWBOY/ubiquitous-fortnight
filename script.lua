@@ -1399,6 +1399,8 @@ supportTab:AddLabel("━━━━━━━━━━━━━━━━━━━�
 boothTab:Show()
 library:FormatWindows()
 settingsLock = false
+task.spawn(function() while task.wait(0.25) do if getgenv().settings.rainbowText then pcall(updateBoothText) end end end)
+
 
 -- [Le reste du code continue exactement comme dans l'original...]
 -- Je n'ai modifié
