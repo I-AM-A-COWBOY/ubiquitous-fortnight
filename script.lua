@@ -420,6 +420,28 @@ local function formatNumber(n)
     end
 end
 
+local function rainbowify(text, offset)
+	offset = offset or 0
+	local result = ""
+	for i = 1, #text do
+		local char = text:sub(i, i)
+		if char ~= " " then
+			local hue = ((i * 25 + offset) % 360) / 360
+			local color = Color3.fromHSV(hue, 1, 1)
+			result ..= string.format(
+				'<font color="rgb(%d,%d,%d)">%s</font>',
+				math.floor(color.R * 255),
+				math.floor(color.G * 255),
+				math.floor(color.B * 255),
+				char
+			)
+		else
+			result ..= char
+		end
+	end
+	return result
+end
+
 function updateBoothText()
     if not (getgenv().settings.textUpdateToggle and getgenv().settings.customBoothText) then
         return
@@ -459,7 +481,12 @@ function updateBoothText()
         buttonHoverColor = Color3.new(98, 255, 0),
         buttonLayout     = ""
     }
-    basePayload.text = text
+    if getgenv().settings.rainbowText then
+	basePayload.text = rainbowify(text, tick() * 40)
+else
+	basePayload.text = text
+end
+
     Remotes.Event("SetCustomization"):FireServer(basePayload, "booth")
 end
 
@@ -738,6 +765,12 @@ boothTab:AddButton("💾 Mettre à jour le texte", function()
 		updateBoothText()
 	end
 end)
+
+local rainbowToggle = boothTab:AddSwitch("🌈 Texte multicolore animé", function(bool)
+	getgenv().settings.rainbowText = bool
+	saveSettings()
+end)
+rainbowToggle:Set(getgenv().settings.rainbowText)
 
 boothTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
 boothTab:AddLabel("📍 POSITION")
@@ -1652,6 +1685,14 @@ Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
 	updateBoothText()
 end)
 updateBoothText()
+
+task.spawn(function()
+	while task.wait(0.3) do
+		if getgenv().settings.rainbowText then
+			pcall(updateBoothText)
+		end
+	end
+end)
 
 task.spawn(function()
 	raisedV = 0
