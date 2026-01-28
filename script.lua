@@ -641,7 +641,7 @@ local easterclr = easterlol[math.random(1,#easterlol)]
 local Window = library:AddWindow("💎 PLS DONATE PRO | discord.gg/YTpK5wWBHj",
   {
 	main_color = easterclr,
-	min_size = Vector2.new(900, 750),
+	min_size = Vector2.new(600, 650),
 	toggle_key = Enum.KeyCode.RightShift,
 	can_resize = true,
 })
