@@ -1029,17 +1029,19 @@ local serverHopDelaySL = serverHopTab:AddTextBox("⏱️ Délai Hop (Minutes)", 
 		return
 	end
 	getgenv().settings.serverHopDelay = tonumber(text)
+	saveSettings()
 	hopSet()
 end, {["clear"] = false})
 serverHopDelaySL.Text = 'Délai: ' .. getgenv().settings.serverHopDelay .. 'min'
 serverHopTab:AddLabel("⚠️ Le timer se réinitialise après donation")
 
-serverHopTab:AddButton("💾 Sauvegarder le délai", function()
+serverHopTab:AddButton("💾 Sauvegarder & lancer le timer", function()
 	saveSettings()
+	hopSet() -- relance le compte à rebours
 	game:GetService("StarterGui"):SetCore("SendNotification", {
-		Title = "✅ Sauvegardé",
-		Text = "Le délai de server hop a bien été enregistré",
-		Duration = 3
+		Title = "⏱️ Timer Server Hop",
+		Text = "Server hop dans " .. getgenv().settings.serverHopDelay .. " minute(s)",
+		Duration = 4
 	})
 end)
 
