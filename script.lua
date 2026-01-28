@@ -580,7 +580,7 @@ end
 function rgb(hex)
 	hex = hex:gsub("#", "")
 	local r, g, b = tonumber("0x" .. hex:sub(1, 2)), tonumber("0x" .. hex:sub(3, 4)), tonumber("0x" .. hex:sub(5, 6))
-	return Color3.new(r, g, b)
+	return Color3.new(r/255, g/255, b/255)
 end
 
 if CoreGui:FindFirstChild('RobloxPromptGui') then
@@ -1399,7 +1399,6 @@ supportTab:AddLabel("━━━━━━━━━━━━━━━━━━━�
 boothTab:Show()
 library:FormatWindows()
 settingsLock = false
-task.spawn(function() while task.wait(0.25) do if getgenv().settings.rainbowText then pcall(updateBoothText) end end end)
 
 
 -- [Le reste du code continue exactement comme dans l'original...]
