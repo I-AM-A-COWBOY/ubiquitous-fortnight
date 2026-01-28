@@ -1034,6 +1034,15 @@ end, {["clear"] = false})
 serverHopDelaySL.Text = 'Délai: ' .. getgenv().settings.serverHopDelay .. 'min'
 serverHopTab:AddLabel("⚠️ Le timer se réinitialise après donation")
 
+serverHopTab:AddButton("💾 Sauvegarder le délai", function()
+	saveSettings()
+	game:GetService("StarterGui"):SetCore("SendNotification", {
+		Title = "✅ Sauvegardé",
+		Text = "Le délai de server hop a bien été enregistré",
+		Duration = 3
+	})
+end)
+
 -- ═══════════════════════════════════════════════════════════════
 -- 🎯 CONFIGURATION PRINCIPALE
 -- ═══════════════════════════════════════════════════════════════
