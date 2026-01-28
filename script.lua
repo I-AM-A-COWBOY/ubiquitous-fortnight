@@ -1,9 +1,3 @@
---[[
-	This property is protected.
-	You are not allowed to claim this as your own.
-	Removal of initial credits to the authors is prohibited.
-]]
-
 repeat
 	task.wait()
 until game:IsLoaded()
@@ -21,11 +15,6 @@ else
 	warn("⚠️ queueonteleport non supporté par ton exécuteur")
 end
 
-if game.PlaceId ~= 8737602449 and game.PlaceId ~= 8943844393 then
-	return
-end
-
---Stops script if on a different game
 if game.PlaceId ~= 8737602449 and game.PlaceId ~= 8943844393 then
 	return
 end
@@ -54,10 +43,11 @@ end
 if not workspace then
 	workspace = game:GetService('Workspace')
 end
+
 local Remotes
 
 for i,v in next, ReplicatedStorage:GetChildren() do
-   if v.Name:find('Remote') and v.IsA(v, 'ModuleScript') then
+   if v.Name:find('Remote') and v:IsA('ModuleScript') then
        local suc = pcall(function()
            require(v).Event('PromotionBlimpGiftbux'):FireServer()
        end)
@@ -90,10 +80,9 @@ end
 
 task.wait()
 
---Anti-AFK
 local connections = getconnections or get_signal_cons or nil
 task.spawn(function()
-	if false then
+	if connections then
 		for a, b in next, connections(Players.LocalPlayer.Idled) do
 			b:Disable()
 		end
@@ -106,21 +95,32 @@ task.spawn(function()
 	end
 end)
 
-local _CFRAMETABLE = {{166.584, 3.47699, 371.398},{228.765, 3.57067, 332.55},{225.878, 3.57066, 274.96},{169.654, 4.11481, 232.826},{102.625, 3.57066, 274.941},{109.353, 3.57066, 351.28}, {166.584, 3.47699, 371.399}}
+local _CFRAMETABLE = {
+	{166.584, 3.47699, 371.398},
+	{228.765, 3.57067, 332.55},
+	{225.878, 3.57066, 274.96},
+	{169.654, 4.11481, 232.826},
+	{102.625, 3.57066, 274.941},
+	{109.353, 3.57066, 351.28}, 
+	{166.584, 3.47699, 371.399}
+}
+
 local unclaimed = {}
 local mainCheckPosition = Vector3.new(165.161,0,311.636)
-local donation, boothText, spamming, hopTimer, vcEnabled
+local donation, boothText, spamming, hopTimer, vcEnabled, bclaimed
 local errCount = 0
 local uid = Players.LocalPlayer.UserId
 local newRaisedFormat = Players.LocalPlayer:WaitForChild('leaderstats'):WaitForChild('Raised')
-local queueonteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport) or nil
-local httprequest = (syn and syn.request) or http and http.request or http_request or (fluxus and fluxus.request) or request
+local httprequest = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
 local httpservice = HttpService
+
 if queueonteleport then
 	queueonteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/I-AM-A-COWBOY/ubiquitous-fortnight/refs/heads/main/script.lua'))()")
 end
+
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/CF-Trail/tzechco-PlsDonateAutofarmBackup/main/UI"))()
 local _HIGHLIGHTLOADER
+
 pcall(function()
      _HIGHLIGHTLOADER = loadstring(game:HttpGet('https://raw.githubusercontent.com/I-AM-A-COWBOY/ubiquitous-fortnight/refs/heads/main/script.lua'))()
 end)
@@ -152,6 +152,7 @@ function forceServerHop()
 end
 
 local settingsLock
+
 function saveSettings()
 	if not settingsLock then
 		local suc, er = pcall(function()
@@ -162,6 +163,7 @@ function saveSettings()
 		end
 	end
 end
+
 getgenv().settings = {}
 
 local sNames = {
@@ -195,7 +197,6 @@ local sValues = {
 	false, 1000, false, false, false, false, 0, false, false, true, false, false, false
 }
 
---Load Settings
 if isfile("nameblocklist.txt") then
 	local ok, v = pcall(readfile, "nameblocklist.txt")
 	if ok and type(v) == 'string' then
@@ -228,7 +229,7 @@ if isfile("plsdonatesettings.txt") then
 	end)
 	if er ~= nil then
 		task.spawn(function()
-			errMsg = Instance.new("Hint")
+			local errMsg = Instance.new("Hint")
 			errMsg.Parent = CoreGui
 			errMsg.Text = tostring("⚠️ ERREUR DE CHARGEMENT - SERVERHOP EN COURS...")
 			task.wait(15)
@@ -245,12 +246,13 @@ if isfile("plsdonatesettings.txt") then
 	end
 end
 
-if #getgenv().settings ~= sNames then
-	for i, v in ipairs(sNames) do
-		if getgenv().settings[v] == nil then
-			getgenv().settings[v] = sValues[i]
-		end
+for i, v in ipairs(sNames) do
+	if getgenv().settings[v] == nil then
+		getgenv().settings[v] = sValues[i]
 	end
+end
+
+if not isfile('plsdonatesettings.txt') then
 	writefile('plsdonatesettings.txt', httpservice:JSONEncode(getgenv().settings))
 end
 
@@ -265,6 +267,7 @@ local RandomName = "PlsDonateServerHop-Temp"
 local File = pcall(function()
 	AllIDs = S_H:JSONDecode(readfile(RandomName .. ".json"))
 end)
+
 if not File then
 	table.insert(AllIDs, actualHour)
 	pcall(function()
@@ -370,7 +373,8 @@ local function oldWebhook(msg)
 	end)
 end
 
-local sliderInProgress = false;
+local sliderInProgress = false
+
 local function slider(value, whichSlider)
 	if sliderInProgress then
 		return
@@ -379,22 +383,25 @@ local function slider(value, whichSlider)
 	task.wait(5)
 	if getgenv().settings[whichSlider] == value then
 		saveSettings()
-		sliderInProgress = false;
+		sliderInProgress = false
 		if whichSlider == "serverHopDelay" then
 			hopSet()
 		end
 	else
-		sliderInProgress = false;
+		sliderInProgress = false
 		return slider(getgenv().settings[whichSlider], whichSlider)
 	end
 end
 
 local _shuffled = workspace:WaitForChild('MapUI',3)
 local _shufflerandom = 0
+
 if not _shuffled then
    _shufflerandom = 1
 end
+
 local _boothlocation
+
 if _shufflerandom == 1 then
 	pcall(function()
 	   _boothlocation = Players.LocalPlayer:WaitForChild('PlayerGui',5):WaitForChild('MapUIContainer',5):WaitForChild('MapUI',5)
@@ -428,7 +435,7 @@ local function rainbowify(text, offset)
 		if char ~= " " then
 			local hue = ((i * 25 + offset) % 360) / 360
 			local color = Color3.fromHSV(hue, 1, 1)
-			result ..= string.format(
+			result = result .. string.format(
 				'<font color="rgb(%d,%d,%d)">%s</font>',
 				math.floor(color.R * 255),
 				math.floor(color.G * 255),
@@ -436,7 +443,7 @@ local function rainbowify(text, offset)
 				char
 			)
 		else
-			result ..= char
+			result = result .. char
 		end
 	end
 	return result
@@ -481,11 +488,12 @@ function updateBoothText()
         buttonHoverColor = Color3.new(98, 255, 0),
         buttonLayout     = ""
     }
+    
     if getgenv().settings.rainbowText then
-	basePayload.text = rainbowify(text, tick() * 40)
-else
-	basePayload.text = text
-end
+        basePayload.text = rainbowify(text, tick() * 40)
+    else
+        basePayload.text = text
+    end
 
     Remotes.Event("SetCustomization"):FireServer(basePayload, "booth")
 end
@@ -505,7 +513,7 @@ local function begging()
 end
 
 local function fetchNearPlr()
-	local minmagnif,plrfoundf
+	local minmagnif, plrfoundf
 	local lplrChar = Players.LocalPlayer.Character
 	if lplrChar then
 		local humanoidthing = lplrChar:FindFirstChildOfClass('Humanoid')
@@ -616,7 +624,7 @@ local function checkForBots()
 		if v:IsA('TextLabel') then
 			for _i, text in flaggedTexts do
 				if string.find(v.Text:lower(),text) and not v:GetAttribute('flaggedtext') then
-					flaggedTextCount += 1
+					flaggedTextCount = flaggedTextCount + 1
 					v:SetAttribute('flaggedtext',true)
 				end
 			end
@@ -628,15 +636,11 @@ local function checkForBots()
 end
 
 local easterlol = {
-	Color3.fromRGB(138, 43, 226),  -- Violet moderne
-	Color3.fromRGB(30, 144, 255),  -- Bleu dodger
-	Color3.fromRGB(50, 205, 50),   -- Vert lime
+	Color3.fromRGB(138, 43, 226),
+	Color3.fromRGB(30, 144, 255),
+	Color3.fromRGB(50, 205, 50),
 }
 local easterclr = easterlol[math.random(1,#easterlol)]
-
--- ═══════════════════════════════════════════════════════════════
--- 🎨 INTERFACE UTILISATEUR AMÉLIORÉE
--- ═══════════════════════════════════════════════════════════════
 
 local Window = library:AddWindow("💎 PLS DONATE PRO | discord.gg/YTpK5wWBHj",
   {
@@ -646,33 +650,16 @@ local Window = library:AddWindow("💎 PLS DONATE PRO | discord.gg/YTpK5wWBHj",
 	can_resize = true,
 })
 
--- 🏪 Onglet Stand (Booth)
 local boothTab = Window:AddTab("🏪 Stand")
-
--- 🎯 Onglet Principal
 local mainTab = Window:AddTab("🎯 Principal")
-
--- 💬 Onglet Chat
 local chatTab = Window:AddTab("💬 Chat")
-
--- 🔔 Onglet Webhook
 local webhookTab = Window:AddTab("🔔 Webhook")
-
--- 🌐 Onglet Serveur
 local serverHopTab = Window:AddTab("🌐 Serveur")
-
--- 🤖 Onglet Auto-Réponse
 local otherTab2 = Window:AddTab("🤖 Auto-Réponse")
-
--- ❤️ Onglet Support
 local supportTab = Window:AddTab("❤️ Support")
 
 local TextService = cloneref(game:GetService("TextService"))
 local sgoalR = 0
-
--- ═══════════════════════════════════════════════════════════════
--- 🏪 CONFIGURATION DU STAND
--- ═══════════════════════════════════════════════════════════════
 
 boothTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
 boothTab:AddLabel("📝 MISE À JOUR DU TEXTE")
@@ -795,10 +782,6 @@ standingPos:Add('Left')
 standingPos:Add('Right')
 standingPos:Add('Behind')
 
--- ═══════════════════════════════════════════════════════════════
--- 💬 CONFIGURATION DU CHAT
--- ═══════════════════════════════════════════════════════════════
-
 chatTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
 chatTab:AddLabel("💝 REMERCIEMENTS AUTO")
 chatTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -893,10 +876,6 @@ bm:AddButton("💾 Sauvegarder", function()
 	saveSettings()
 end)
 
--- ═══════════════════════════════════════════════════════════════
--- 🔔 CONFIGURATION WEBHOOK
--- ═══════════════════════════════════════════════════════════════
-
 webhookTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
 webhookTab:AddLabel("🔔 NOTIFICATIONS DISCORD")
 webhookTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -931,7 +910,7 @@ webhookTab:AddLabel("━━━━━━━━━━━━━━━━━━━�
 
 local webhookBox = webhookTab:AddTextBox("🔗 URL Webhook Discord", function(text)
 	if string.find(text, "api/") then
-		getgenv().settings.webhookBox = text;
+		getgenv().settings.webhookBox = text
 		saveSettings()
 	end
 end, {["clear"] = false})
@@ -941,7 +920,7 @@ webhookTab:AddLabel('⚠️ Appuyez sur Entrée pour sauvegarder')
 local TB = webhookTab:AddTextBox("💰 Montant minimum ping", function(text)
 	local x = text:gsub('Minimum: ', '')
 	if tonumber(x) then
-		getgenv().settings.pingAboveDono = tonumber(x);
+		getgenv().settings.pingAboveDono = tonumber(x)
 		saveSettings()
 	end
 end, {["clear"] = false})
@@ -963,10 +942,6 @@ local webhookType = webhookTab:AddDropdown("📋 Type [ " .. getgenv().settings.
 end)
 webhookType:Add('New')
 webhookType:Add('Old')
-
--- ═══════════════════════════════════════════════════════════════
--- 🌐 CONFIGURATION SERVEUR
--- ═══════════════════════════════════════════════════════════════
 
 serverHopTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
 serverHopTab:AddLabel("🔄 CHANGEMENT DE SERVEUR")
@@ -1070,17 +1045,13 @@ serverHopTab:AddLabel("⚠️ Le timer se réinitialise après donation")
 
 serverHopTab:AddButton("💾 Sauvegarder & lancer le timer", function()
 	saveSettings()
-	hopSet() -- relance le compte à rebours
+	hopSet()
 	game:GetService("StarterGui"):SetCore("SendNotification", {
 		Title = "⏱️ Timer Server Hop",
 		Text = "Server hop dans " .. getgenv().settings.serverHopDelay .. " minute(s)",
 		Duration = 4
 	})
 end)
-
--- ═══════════════════════════════════════════════════════════════
--- 🎯 CONFIGURATION PRINCIPALE
--- ═══════════════════════════════════════════════════════════════
 
 mainTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
 mainTab:AddLabel("💃 ANIMATIONS & EFFETS")
@@ -1163,8 +1134,12 @@ local heliToggle = mainTab:AddSwitch('🚁 Hélicoptère sur donation', function
 	local character = Players.LocalPlayer.Character
 	local root = character:FindFirstChildOfClass('Humanoid').RootPart
 	if not bool then
-		root['HL1__HELI']:Destroy()
-		workspace['_HIGHLIGHT.CF']:Destroy()
+		if root:FindFirstChild('HL1__HELI') then
+			root['HL1__HELI']:Destroy()
+		end
+		if workspace:FindFirstChild('_HIGHLIGHT.CF') then
+			workspace['_HIGHLIGHT.CF']:Destroy()
+		end
 	else
 		local Spin = Instance.new("BodyAngularVelocity")
 		Spin.Name = "HL1__HELI"
@@ -1199,6 +1174,7 @@ local _HLTOGGLE = mainTab:AddSwitch('🎵 Chanter sur donation', function(bool)
 	        _HIGHLIGHTLOADER.HLUnload(Players.LocalPlayer.Character)
 	     end
 	end)
+	saveSettings()
 end)
 _HLTOGGLE:Set(getgenv().settings.highlightSwitch)
 
@@ -1268,12 +1244,8 @@ if setfpscap and type(setfpscap) == "function" then
 end
 
 mainTab:AddButton("🧪 Tester Donation (+6R$)", function()
-	Players.LocalPlayer.leaderstats.Raised.Value += 6
+	Players.LocalPlayer.leaderstats.Raised.Value = Players.LocalPlayer.leaderstats.Raised.Value + 6
 end)
-
--- ═══════════════════════════════════════════════════════════════
--- 🤖 AUTO-RÉPONSE
--- ═══════════════════════════════════════════════════════════════
 
 otherTab2:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
 otherTab2:AddLabel("🤖 AUTO-RÉPONSES PROXIMITÉ")
@@ -1311,7 +1283,7 @@ HelloResponce:Set(hfull)
 
 otherTab2:AddLabel("🤖 Réponses 'Tu es un bot':")
 local BotResponce = otherTab2:AddConsole({["y"] = 40, ["source"] = ""})
-local hfull = ''
+hfull = ''
 for i, v in ipairs(getgenv().settings.botResponce) do
 	hfull = hfull .. v .. "\n"
 end
@@ -1319,7 +1291,7 @@ BotResponce:Set(hfull)
 
 otherTab2:AddLabel("💰 Réponses 'Donate pls':")
 local DonateResponce = otherTab2:AddConsole({["y"] = 45, ["source"] = ""})
-local hfull = ''
+hfull = ''
 for i, v in ipairs(getgenv().settings.donateResponce) do
 	hfull = hfull .. v .. "\n"
 end
@@ -1327,7 +1299,7 @@ DonateResponce:Set(hfull)
 
 otherTab2:AddLabel("⚠️ Réponses 'Scammer':")
 local ScamResponce = otherTab2:AddConsole({["y"] = 45, ["source"] = ""})
-local hfull = ''
+hfull = ''
 for i, v in ipairs(getgenv().settings.scamResponce) do
 	hfull = hfull .. v .. "\n"
 end
@@ -1335,7 +1307,7 @@ ScamResponce:Set(hfull)
 
 otherTab2:AddLabel("❓ Autres Réponses:")
 local OtherResponce = otherTab2:AddConsole({["y"] = 45, ["source"] = ""})
-local hfull = ''
+hfull = ''
 for i, v in ipairs(getgenv().settings.otherResponce) do
 	hfull = hfull .. v .. "\n"
 end
@@ -1374,10 +1346,6 @@ otherTab2:AddButton("💾 Sauvegarder toutes les réponses", function()
 	saveSettings()
 end)
 
--- ═══════════════════════════════════════════════════════════════
--- ❤️ SUPPORT
--- ═══════════════════════════════════════════════════════════════
-
 supportTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
 supportTab:AddLabel("❤️ SUPPORT LE CRÉATEUR")
 supportTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -1400,10 +1368,6 @@ boothTab:Show()
 library:FormatWindows()
 settingsLock = false
 
-
--- [Le reste du code continue exactement comme dans l'original...]
--- Je n'ai modifié
-  --Finds unclaimed booths
 local function findUnclaimed()
     unclaimed = {}
     local boothUI      = _boothlocation:WaitForChild("BoothUI")
@@ -1419,7 +1383,7 @@ local function findUnclaimed()
                         local pos2D = Vector3.new(interact.Position.X, 0, interact.Position.Z)
                         if (pos2D - mainPos2D).Magnitude < 92 then
                             table.insert(unclaimed, boothNum)
-                            break  -- stop scanning interactions once we found it
+                            break
                         end
                     end
                 end
@@ -1438,7 +1402,6 @@ if not unclaimed[2] then
    return
 end
 
-  --Claim booth function
 local function boothclaim()
 	Remotes.Event("ClaimBooth"):InvokeServer(unclaimed[2])
 	if not string.find(_boothlocation.BoothUI:FindFirstChild(tostring("BoothUI" .. unclaimed[2])).Details.Owner.Text, Players.LocalPlayer.DisplayName) then
@@ -1448,7 +1411,7 @@ local function boothclaim()
 		end
 	end
 end
-  --Checks if booth claim fails
+
 while not pcall(boothclaim) do
 	if errCount >= claimCount then
 		serverHop()
@@ -1456,7 +1419,9 @@ while not pcall(boothclaim) do
 	table.remove(unclaimed, 1)
 	errCount = errCount + 1
 end
+
 hopSet()
+
 getgenv().walkToBooth = function()
 	local theCframe
 	if string.find(tostring(getgenv().settings.boothPosition), "6") then
@@ -1486,7 +1451,7 @@ getgenv().walkToBooth = function()
 	local atboothtick = 0
 	repeat
 		task.wait()
-		atboothtick += 1
+		atboothtick = atboothtick + 1
 		if atboothtick > 999 then
 			break
 		end
@@ -1500,20 +1465,23 @@ getgenv().walkToBooth = function()
 end
 
 walkToBooth()
+
 if getgenv().settings.autoBeg then
 	spamming = task.spawn(begging)
 end
 
-local RaisedC = Players.LocalPlayer.leaderstats.Raised.value
+local RaisedC = Players.LocalPlayer.leaderstats.Raised.Value
 local djset = false
 local helidebounce = false
 local lapdebounce = false
+
 Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
 	local playerWhoDonated
 	sgoalR = sgoalR + (Players.LocalPlayer.leaderstats.Raised.Value - RaisedC)
     local raisedValue = Players.LocalPlayer.leaderstats.Raised.Value
     local raised = raisedValue - RaisedC
 	hopSet()
+	
 	if Players.LocalPlayer.Character:FindFirstChildWhichIsA('Humanoid').RootPart:FindFirstChild('Spin') and getgenv().settings.spinSet then
 		local humanoid = Players.LocalPlayer.Character:FindFirstChildWhichIsA('Humanoid')
 		local spinPart = humanoid.RootPart:FindFirstChild('Spin')
@@ -1523,6 +1491,7 @@ Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
 		local spinYVelocity = spinPart.AngularVelocity.Y
 		xspin = (averageDelta * sSM) + spinYVelocity
 	end
+	
 	if getgenv().settings.webhookToggle == true and getgenv().settings.webhookBox then
 		task.spawn(function()
 			playerWhoDonated = fetchNearPlr()
@@ -1549,23 +1518,28 @@ Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
 			end
 		end)
 	end
+	
 	if getgenv().settings.serverHopAfterDonation == true then
 		task.spawn(serverHop)
 	end
+	
 	if Players.LocalPlayer.Character.Humanoid.RootPart:FindFirstChild('Spin') and getgenv().settings.spinSet == true and not getgenv().settings.highlightSwitch then
 		local spin = Players.LocalPlayer.Character.Humanoid.RootPart:FindFirstChild('Spin')
 		spin.AngularVelocity = Vector3.new(0, xspin, 0)
 	end
+	
 	if getgenv().settings.jumpBoost and not getgenv().settings.highlightSwitch then
 		pcall(function()
 			Players.LocalPlayer.Character.Humanoid.JumpPower = Players.LocalPlayer.Character.Humanoid.JumpPower + (raised)
 		end)		
 	end
+	
 	pcall(function()
 		if getgenv().settings.gravitySwitch and not getgenv().settings.highlightSwitch then
 			workspace.Gravity = workspace.Gravity - (raised)
 		end
 	end)
+	
 	task.spawn(function()
 		if getgenv().settings.helicopterEnabled and not getgenv().settings.highlightSwitch then
 			if helidebounce then
@@ -1606,7 +1580,8 @@ Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
 			Players:Chat('/e wave')
 		end
 	end)
-	if getgenv().settings.donationJump == true and not getgenv().settings.spinSet == true and not getgenv().settings.highlightSwitch then
+	
+	if getgenv().settings.donationJump == true and not getgenv().settings.highlightSwitch then
 		djset = true
 		task.spawn(function()
 			if getgenv().settings.jumpsPerRobux == 1 then
@@ -1627,6 +1602,7 @@ Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
 			djset = false
 		end)
 	end
+	
     if getgenv().settings.robuxLap then
 		if lapdebounce then
 			return
@@ -1653,18 +1629,22 @@ Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
             lapdebounce = false
         end)
     end
+    
 	if getgenv().settings.highlightSwitch then
 		task.spawn(function()
 			_HIGHLIGHTLOADER.HLStart(Players.LocalPlayer.Character, Players.LocalPlayer.leaderstats.Raised.Value - RaisedC, (playerWhoDonated and playerWhoDonated or fetchNearPlr() or nil))
 		end)
 	end
-	RaisedC = Players.LocalPlayer.leaderstats.Raised.value
+	
+	RaisedC = Players.LocalPlayer.leaderstats.Raised.Value
+	
 	if getgenv().settings.autoThanks == true then
 		task.spawn(function()
 			task.wait(getgenv().settings.thanksDelay)
 			chat(getgenv().settings.thanksMessage[math.random(#getgenv().settings.thanksMessage)])
 		end)
 	end
+	
 	task.spawn(function()
 		repeat
 			task.wait()
@@ -1679,12 +1659,15 @@ Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
 			Players:Chat("/e dance" .. object)
 		end
 	end)
+	
 	if getgenv().settings.goalServerhopSwitch and sgoalR >= getgenv().settings.goalServerhopGoal then
 		serverHop()
 	end
+	
 	task.wait(getgenv().settings.textUpdateDelay)
 	updateBoothText()
 end)
+
 updateBoothText()
 
 task.spawn(function()
@@ -1696,7 +1679,7 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-	raisedV = 0
+	local raisedV = 0
 	task.wait(5)
 	Players.LocalPlayer.CharacterRemoving:Connect(function()
 		if getgenv().settings.spinSet and not getgenv().settings.highlightSwitch then
@@ -1740,27 +1723,9 @@ end
 
 local messagesToResp = {
 	['Greetings'] = {
-		'hi',
-		'hello',
-		'hey',
-		'sup',
-		'yo',
-		'howdy',
-		'sup bro',
-		'sup dude',
-		'hai',
-		'hii',
-		'hey man',
-		'hiya',
-		'heyy',
-		'hello man',
-		'hello dude',
-		'hi bro',
-		'hi sup',
-		'hiey',
-		'👋',
-		'hey hello',
-		'sup hi'
+		'hi', 'hello', 'hey', 'sup', 'yo', 'howdy', 'sup bro', 'sup dude', 'hai', 'hii',
+		'hey man', 'hiya', 'heyy', 'hello man', 'hello dude', 'hi bro', 'hi sup', 'hiey',
+		'👋', 'hey hello', 'sup hi'
 	},
 }
 
@@ -1790,7 +1755,7 @@ Players.PlayerChatted:Connect(function(_____________________, player, message)
 				elseif string.find(message, 'scam') then
 					chat(getgenv().settings.scamResponce[math.random(1, #getgenv().settings.scamResponce)])
 				else
-				        if not getgenv().autoReplyNoRespond then
+				        if not getgenv().settings.autoReplyNoRespond then
 					       chat(getgenv().settings.otherResponce[math.random(1, #getgenv().settings.otherResponce)])
 					end
 				end
