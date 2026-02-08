@@ -1,0 +1,338 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local clickedCharacters = {}
+
+local function createUI()
+    if playerGui:FindFirstChild("ProximityClickerUI") then
+        playerGui:FindFirstChild("ProximityClickerUI"):Destroy()
+    end
+    
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "ProximityClickerUI"
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.Parent = playerGui
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Size = UDim2.new(0, 350, 0, 450)
+    mainFrame.Position = UDim2.new(0.5, -175, 0.5, -225)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Active = true
+    mainFrame.Draggable = true
+    mainFrame.Parent = screenGui
+    
+    local mainCorner = Instance.new("UICorner")
+    mainCorner.CornerRadius = UDim.new(0, 12)
+    mainCorner.Parent = mainFrame
+    
+    local mainStroke = Instance.new("UIStroke")
+    mainStroke.Color = Color3.fromRGB(100, 100, 255)
+    mainStroke.Thickness = 2
+    mainStroke.Parent = mainFrame
+    
+    spawn(function()
+        while mainFrame.Parent do
+            for i = 100, 200, 5 do
+                if not mainFrame.Parent then break end
+                mainStroke.Color = Color3.fromRGB(i, i, 255)
+                wait(0.05)
+            end
+            for i = 200, 100, -5 do
+                if not mainFrame.Parent then break end
+                mainStroke.Color = Color3.fromRGB(i, i, 255)
+                wait(0.05)
+            end
+        end
+    end)
+    
+    local header = Instance.new("Frame")
+    header.Name = "Header"
+    header.Size = UDim2.new(1, 0, 0, 50)
+    header.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+    header.BorderSizePixel = 0
+    header.Parent = mainFrame
+    
+    local headerCorner = Instance.new("UICorner")
+    headerCorner.CornerRadius = UDim.new(0, 12)
+    headerCorner.Parent = header
+    
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.Size = UDim2.new(1, -100, 1, 0)
+    title.Position = UDim2.new(0, 10, 0, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "👆 Proximity Clicker"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 20
+    title.Font = Enum.Font.GothamBold
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = header
+    
+    local closeButton = Instance.new("TextButton")
+    closeButton.Name = "CloseButton"
+    closeButton.Size = UDim2.new(0, 40, 0, 40)
+    closeButton.Position = UDim2.new(1, -45, 0, 5)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    closeButton.Text = "✕"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.TextSize = 20
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.BorderSizePixel = 0
+    closeButton.Parent = header
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 8)
+    closeCorner.Parent = closeButton
+    
+    local closeStroke = Instance.new("UIStroke")
+    closeStroke.Color = Color3.fromRGB(200, 0, 0)
+    closeStroke.Thickness = 1
+    closeStroke.Parent = closeButton
+    
+    closeButton.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+    
+    local scrollFrame = Instance.new("ScrollingFrame")
+    scrollFrame.Name = "CharacterList"
+    scrollFrame.Size = UDim2.new(1, -20, 1, -70)
+    scrollFrame.Position = UDim2.new(0, 10, 0, 60)
+    scrollFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    scrollFrame.BorderSizePixel = 0
+    scrollFrame.ScrollBarThickness = 6
+    scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 255)
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    scrollFrame.Parent = mainFrame
+    
+    local scrollCorner = Instance.new("UICorner")
+    scrollCorner.CornerRadius = UDim.new(0, 8)
+    scrollCorner.Parent = scrollFrame
+    
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.Padding = UDim.new(0, 8)
+    listLayout.SortOrder = Enum.SortOrder.Name
+    listLayout.Parent = scrollFrame
+    
+    return mainFrame, scrollFrame, listLayout
+end
+
+local function findProximityPrompt(model)
+    for _, descendant in ipairs(model:GetDescendants()) do
+        if descendant:IsA("ProximityPrompt") then
+            return descendant
+        end
+    end
+    return nil
+end
+
+local function findTeleportPosition(model)
+    local hrp = model:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        return hrp.CFrame + Vector3.new(0, 3, 0)
+    end
+    
+    local primaryPart = model.PrimaryPart
+    if primaryPart then
+        return primaryPart.CFrame + Vector3.new(0, 3, 0)
+    end
+    
+    for _, child in ipairs(model:GetDescendants()) do
+        if child:IsA("BasePart") then
+            return child.CFrame + Vector3.new(0, 3, 0)
+        end
+    end
+    
+    return nil
+end
+
+local function createCharacterButton(characterModel, parent)
+    local button = Instance.new("TextButton")
+    button.Name = characterModel.Name
+    button.Size = UDim2.new(1, -10, 0, 40)
+    button.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+    button.Text = "👆 " .. characterModel.Name
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 14
+    button.Font = Enum.Font.Gotham
+    button.BorderSizePixel = 0
+    button.Parent = parent
+    
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 8)
+    buttonCorner.Parent = button
+    
+    local buttonStroke = Instance.new("UIStroke")
+    buttonStroke.Color = Color3.fromRGB(70, 70, 200)
+    buttonStroke.Thickness = 2
+    buttonStroke.Parent = button
+    
+    button.MouseButton1Click:Connect(function()
+        local currentCharacter = player.Character
+        if not currentCharacter then return end
+        
+        local currentHRP = currentCharacter:FindFirstChild("HumanoidRootPart")
+        if not currentHRP then return end
+        
+        local originalPosition = currentHRP.CFrame
+        
+        local proximityPrompt = findProximityPrompt(characterModel)
+        if not proximityPrompt then
+            button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            button.Text = "❌ Pas de ProximityPrompt"
+            buttonStroke.Color = Color3.fromRGB(150, 30, 30)
+            
+            wait(1)
+            
+            if button.Parent then
+                button.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+                button.Text = "👆 " .. characterModel.Name
+                buttonStroke.Color = Color3.fromRGB(70, 70, 200)
+            end
+            return
+        end
+        
+        local teleportPosition = findTeleportPosition(characterModel)
+        if not teleportPosition then
+            button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            button.Text = "❌ Impossible de trouver position"
+            buttonStroke.Color = Color3.fromRGB(150, 30, 30)
+            
+            wait(1)
+            
+            if button.Parent then
+                button.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+                button.Text = "👆 " .. characterModel.Name
+                buttonStroke.Color = Color3.fromRGB(70, 70, 200)
+            end
+            return
+        end
+        
+        button.BackgroundColor3 = Color3.fromRGB(255, 200, 50)
+        button.Text = "⏳ Téléportation..."
+        buttonStroke.Color = Color3.fromRGB(200, 150, 30)
+        
+        currentHRP.CFrame = teleportPosition
+        
+        wait(0.2)
+        
+        if proximityPrompt.Enabled then
+            fireproximityprompt(proximityPrompt)
+            
+            button.Text = "✅ Clic effectué!"
+            button.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+            buttonStroke.Color = Color3.fromRGB(30, 150, 30)
+        else
+            button.Text = "❌ ProximityPrompt désactivé"
+            button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            buttonStroke.Color = Color3.fromRGB(150, 30, 30)
+        end
+        
+        wait(0.3)
+        
+        button.Text = "⏳ Retour..."
+        button.BackgroundColor3 = Color3.fromRGB(255, 200, 50)
+        buttonStroke.Color = Color3.fromRGB(200, 150, 30)
+        
+        currentHRP.CFrame = originalPosition
+        
+        wait(0.5)
+        
+        if button.Parent then
+            button.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+            button.Text = "👆 " .. characterModel.Name
+            buttonStroke.Color = Color3.fromRGB(70, 70, 200)
+            
+            local tweenBack = TweenService:Create(button, TweenInfo.new(0.3), {
+                BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+            })
+            tweenBack:Play()
+        end
+    end)
+    
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(120, 120, 255)
+        }):Play()
+    end)
+    
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+        }):Play()
+    end)
+    
+    return button
+end
+
+local function getCharacters()
+    local characters = {}
+    
+    local workspace = game:GetService("Workspace")
+    local essentials = workspace:FindFirstChild("Essentials")
+    
+    if not essentials then
+        warn("Dossier 'Essentials' non trouvé dans Workspace")
+        return characters
+    end
+    
+    local charactersFolder = essentials:FindFirstChild("Characters")
+    
+    if not charactersFolder then
+        warn("Dossier 'Characters' non trouvé dans Essentials")
+        return characters
+    end
+    
+    for _, child in ipairs(charactersFolder:GetChildren()) do
+        if child:IsA("Model") then
+            local proximityPrompt = findProximityPrompt(child)
+            if proximityPrompt then
+                table.insert(characters, child)
+                print("✅ Trouvé: " .. child.Name .. " avec ProximityPrompt dans " .. proximityPrompt.Parent.Name)
+            else
+                print("⚠️ Ignoré: " .. child.Name .. " (pas de ProximityPrompt)")
+            end
+        end
+    end
+    
+    return characters
+end
+
+local function main()
+    local mainFrame, scrollFrame, listLayout = createUI()
+    
+    local characters = getCharacters()
+    
+    if #characters == 0 then
+        local noCharLabel = Instance.new("TextLabel")
+        noCharLabel.Size = UDim2.new(1, 0, 0, 50)
+        noCharLabel.BackgroundTransparency = 1
+        noCharLabel.Text = "❌ Aucun personnage avec ProximityPrompt trouvé"
+        noCharLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        noCharLabel.TextSize = 16
+        noCharLabel.Font = Enum.Font.Gotham
+        noCharLabel.Parent = scrollFrame
+    else
+        for _, character in ipairs(characters) do
+            createCharacterButton(character, scrollFrame)
+        end
+    end
+    
+    listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        scrollFrame.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 10)
+    end)
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 10)
+    
+    print("✅ Proximity Clicker UI chargé avec succès!")
+    print("📊 " .. #characters .. " personnage(s) avec ProximityPrompt trouvé(s)")
+end
+
+main()
