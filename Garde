@@ -1,11 +1,28 @@
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 local activeButtons = {}
+local noclipEnabled = false
+
+RunService.Stepped:Connect(function()
+    if player.Character then
+        for _, part in ipairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                if noclipEnabled then
+                    part.CanCollide = false
+                else
+                    if part.Name ~= "HumanoidRootPart" then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+    end
+end)
 
 local function rippleEffect(object)
     object.MouseEnter:Connect(function()
@@ -47,6 +64,7 @@ local function createUI()
     mainFrame.BorderSizePixel = 0
     mainFrame.Active = true
     mainFrame.Draggable = true
+    mainFrame.ClipsDescendants = true
     mainFrame.Parent = screenGui
     
     local mainCorner = Instance.new("UICorner", mainFrame)
@@ -73,7 +91,7 @@ local function createUI()
     Instance.new("UICorner", header).CornerRadius = UDim.new(0, 15)
 
     local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, -100, 1, 0)
+    title.Size = UDim2.new(1, -120, 1, 0)
     title.Position = UDim2.new(0, 20, 0, 0)
     title.BackgroundTransparency = 1
     title.Text = "PROXIMITY HUB"
@@ -172,6 +190,79 @@ local function createUI()
         autoClickTabBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
     end)
 
+    local speedInput = Instance.new("TextBox")
+    speedInput.Size = UDim2.new(0.6, -10, 0, 40)
+    speedInput.Position = UDim2.new(0, 20, 0, 20)
+    speedInput.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+    speedInput.PlaceholderText = "Vitesse"
+    speedInput.Text = ""
+    speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    speedInput.Font = Enum.Font.Gotham
+    speedInput.Parent = containerPlayer
+    Instance.new("UICorner", speedInput).CornerRadius = UDim.new(0, 8)
+
+    local speedBtn = Instance.new("TextButton")
+    speedBtn.Size = UDim2.new(0.4, -10, 0, 40)
+    speedBtn.Position = UDim2.new(0.6, 15, 0, 20)
+    speedBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 255)
+    speedBtn.Text = "SET SPEED"
+    speedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    speedBtn.Font = Enum.Font.GothamBold
+    speedBtn.Parent = containerPlayer
+    Instance.new("UICorner", speedBtn).CornerRadius = UDim.new(0, 8)
+
+    speedBtn.MouseButton1Click:Connect(function()
+        local val = tonumber(speedInput.Text)
+        if val and player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = val
+        end
+    end)
+
+    local jumpInput = Instance.new("TextBox")
+    jumpInput.Size = UDim2.new(0.6, -10, 0, 40)
+    jumpInput.Position = UDim2.new(0, 20, 0, 70)
+    jumpInput.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+    jumpInput.PlaceholderText = "Saut"
+    jumpInput.Text = ""
+    jumpInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    jumpInput.Font = Enum.Font.Gotham
+    jumpInput.Parent = containerPlayer
+    Instance.new("UICorner", jumpInput).CornerRadius = UDim.new(0, 8)
+
+    local jumpBtn = Instance.new("TextButton")
+    jumpBtn.Size = UDim2.new(0.4, -10, 0, 40)
+    jumpBtn.Position = UDim2.new(0.6, 15, 0, 70)
+    jumpBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 255)
+    jumpBtn.Text = "SET JUMP"
+    jumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    jumpBtn.Font = Enum.Font.GothamBold
+    jumpBtn.Parent = containerPlayer
+    Instance.new("UICorner", jumpBtn).CornerRadius = UDim.new(0, 8)
+
+    jumpBtn.MouseButton1Click:Connect(function()
+        local val = tonumber(jumpInput.Text)
+        if val and player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.UseJumpPower = true
+            player.Character.Humanoid.JumpPower = val
+        end
+    end)
+
+    local noclipBtn = Instance.new("TextButton")
+    noclipBtn.Size = UDim2.new(1, -40, 0, 40)
+    noclipBtn.Position = UDim2.new(0, 20, 0, 120)
+    noclipBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+    noclipBtn.Text = "NOCLIP: OFF"
+    noclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    noclipBtn.Font = Enum.Font.GothamBold
+    noclipBtn.Parent = containerPlayer
+    Instance.new("UICorner", noclipBtn).CornerRadius = UDim.new(0, 8)
+
+    noclipBtn.MouseButton1Click:Connect(function()
+        noclipEnabled = not noclipEnabled
+        noclipBtn.Text = noclipEnabled and "NOCLIP: ON" or "NOCLIP: OFF"
+        noclipBtn.BackgroundColor3 = noclipEnabled and Color3.fromRGB(50, 180, 50) or Color3.fromRGB(40, 40, 55)
+    end)
+
     local searchBox = Instance.new("TextBox")
     searchBox.Size = UDim2.new(1, -40, 0, 35)
     searchBox.Position = UDim2.new(0, 20, 0, 10)
@@ -196,36 +287,6 @@ local function createUI()
     listLayout.Padding = UDim.new(0, 10)
     listLayout.SortOrder = Enum.SortOrder.Name
     listLayout.Parent = scrollFrame
-
-    local speedInput = Instance.new("TextBox")
-    speedInput.Size = UDim2.new(1, -40, 0, 45)
-    speedInput.Position = UDim2.new(0, 20, 0, 20)
-    speedInput.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-    speedInput.Text = ""
-    speedInput.PlaceholderText = "Vitesse (Défaut: 16)"
-    speedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-    speedInput.Font = Enum.Font.Gotham
-    speedInput.TextSize = 16
-    speedInput.Parent = containerPlayer
-    Instance.new("UICorner", speedInput).CornerRadius = UDim.new(0, 10)
-
-    local speedBtn = Instance.new("TextButton")
-    speedBtn.Size = UDim2.new(1, -40, 0, 45)
-    speedBtn.Position = UDim2.new(0, 20, 0, 75)
-    speedBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 255)
-    speedBtn.Text = "APPLIQUER VITESSE"
-    speedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    speedBtn.Font = Enum.Font.GothamBold
-    speedBtn.TextSize = 14
-    speedBtn.Parent = containerPlayer
-    Instance.new("UICorner", speedBtn).CornerRadius = UDim.new(0, 10)
-
-    speedBtn.MouseButton1Click:Connect(function()
-        local val = tonumber(speedInput.Text)
-        if val and player.Character and player.Character:FindFirstChild("Humanoid") then
-            player.Character.Humanoid.WalkSpeed = val
-        end
-    end)
 
     searchBox:GetPropertyChangedSignal("Text"):Connect(function()
         local filter = searchBox.Text:lower()
