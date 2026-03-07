@@ -1170,7 +1170,7 @@ local heliToggle = mainTab:AddSwitch('🚁 Hélicoptère sur donation', function
 		Spin.Name = "HL1__HELI"
 		Spin.Parent = root
 		Spin.MaxTorque = Vector3.new(0, math.huge , 0)
-		Spin.AngularVelocity = Vector3.new(0, 1, 0)
+		Spin.AngularVelocity = Vector3.new(0, 0, 0)
 		local __PART = Instance.new('Part', workspace)
 		__PART.Name = '_HIGHLIGHT.CF'
 		__PART.Size = Vector3.new(20,2,20)
@@ -1579,7 +1579,7 @@ Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
 				CFrame = CFrame.new(C_OLDPOS)
 			})
 			local _TWN4 = twn(char.Humanoid.RootPart.HL1__HELI, TweenInfo.new(6, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {
-				AngularVelocity = Vector3.new(0, 1, 0)
+				AngularVelocity = Vector3.new(0, 0, 0)
 			})    
 			_TWN2:Play()
 			task.wait(10)
