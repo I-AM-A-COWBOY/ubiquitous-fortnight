@@ -1561,7 +1561,7 @@ Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
 			Players:Chat('/e dance2')
 			task.wait(3)
 			local _TWN = twn(char.Humanoid.RootPart.HL1__HELI, TweenInfo.new(6, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {
-				AngularVelocity = Vector3.new(0, 25, 0)
+				AngularVelocity = Vector3.new(0, 20, 0)
 			})
 			_TWN:Play()
 			task.wait(4)
