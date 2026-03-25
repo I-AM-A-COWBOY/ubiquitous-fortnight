@@ -1,0 +1,37 @@
+local Module = {}
+
+function Module:AfficherMenu()
+    local Gui = Instance.new("ScreenGui")
+    Gui.Name = "ExploitMenu"
+    Gui.Parent = game:GetService("CoreGui")
+
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Size = UDim2.new(0, 200, 0, 120)
+    MainFrame.Position = UDim2.new(0.5, -100, 0.5, -60)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    MainFrame.BorderSizePixel = 2
+    MainFrame.Active = true
+    MainFrame.Draggable = true -- Tu peux le déplacer avec la souris
+    MainFrame.Parent = Gui
+
+    local KillBtn = Instance.new("TextButton")
+    KillBtn.Size = UDim2.new(0, 180, 0, 50)
+    KillBtn.Position = UDim2.new(0, 10, 0, 35)
+    KillBtn.Text = "KILL ALL"
+    KillBtn.FontSize = Enum.FontSize.Size24
+    KillBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    KillBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    KillBtn.Parent = MainFrame
+
+    KillBtn.MouseButton1Click:Connect(function()
+        for _, p in pairs(game:GetService("Players"):GetPlayers()) do
+            if p ~= game:GetService("Players").LocalPlayer then
+                if p.Character and p.Character:FindFirstChild("Humanoid") then
+                    p.Character.Humanoid.Health = 0
+                end
+            end
+        end
+    end)
+end
+
+return Module
