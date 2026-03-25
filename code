@@ -1,37 +1,49 @@
-local Module = {}
+-- Création de l'interface (Menu)
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local KillButton = Instance.new("TextButton")
+local Title = Instance.new("TextLabel")
 
-function Module:AfficherMenu()
-    local Gui = Instance.new("ScreenGui")
-    Gui.Name = "ExploitMenu"
-    Gui.Parent = game:GetService("CoreGui")
+-- Propriétés du Menu
+ScreenGui.Name = "SimpleKillMenu"
+ScreenGui.Parent = game:GetService("CoreGui")
 
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 200, 0, 120)
-    MainFrame.Position = UDim2.new(0.5, -100, 0.5, -60)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    MainFrame.BorderSizePixel = 2
-    MainFrame.Active = true
-    MainFrame.Draggable = true -- Tu peux le déplacer avec la souris
-    MainFrame.Parent = Gui
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BorderSizePixel = 2
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
+MainFrame.Size = UDim2.new(0, 200, 0, 100)
+MainFrame.Active = true
+MainFrame.Draggable = true -- Tu peux le déplacer à la souris
 
-    local KillBtn = Instance.new("TextButton")
-    KillBtn.Size = UDim2.new(0, 180, 0, 50)
-    KillBtn.Position = UDim2.new(0, 10, 0, 35)
-    KillBtn.Text = "KILL ALL"
-    KillBtn.FontSize = Enum.FontSize.Size24
-    KillBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    KillBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    KillBtn.Parent = MainFrame
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "Kill All Menu"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1
 
-    KillBtn.MouseButton1Click:Connect(function()
-        for _, p in pairs(game:GetService("Players"):GetPlayers()) do
-            if p ~= game:GetService("Players").LocalPlayer then
-                if p.Character and p.Character:FindFirstChild("Humanoid") then
-                    p.Character.Humanoid.Health = 0
-                end
+-- Propriétés du Bouton
+KillButton.Name = "KillButton"
+KillButton.Parent = MainFrame
+KillButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+KillButton.Position = UDim2.new(0.1, 0, 0.4, 0)
+KillButton.Size = UDim2.new(0, 160, 0, 40)
+KillButton.Font = Enum.Font.SourceSansBold
+KillButton.Text = "KILL ALL"
+KillButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+KillButton.TextSize = 18
+
+-- Fonction pour tuer tout le monde
+KillButton.MouseButton1Click:Connect(function()
+    for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+        -- On ne se tue pas soi-même
+        if player ~= game:GetService("Players").LocalPlayer then
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                -- Met la vie à 0
+                character.Humanoid.Health = 0
             end
         end
-    end)
-end
-
-return Module
+    end
+end)
